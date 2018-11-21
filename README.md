@@ -1,10 +1,10 @@
 # WIDER FACE PASCAL VOC ANNOTATIONS
 
-This repository contains the [WIDER FACE](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/) annotations converted to the [Pascal VOC](http://host.robots.ox.ac.uk/pascal/VOC/) XML format.
-
 Note, the convert.py is modified from [here](https://github.com/akofman/wider-face-pascal-voc-annotations) to:
 1) Discard invalid bounding boxes (e.g. "0--Parade/0_Parade_Parade_0_452.jpg" x1 y1 w h: 0 0 0 0)
 2) Add toprettyxml for xml readability
+
+This repository contains the [WIDER FACE](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/) annotations converted to the [Pascal VOC](http://host.robots.ox.ac.uk/pascal/VOC/) XML format.
 
 ```
 usage: convert.py [-h] [-ap ANNOTATIONS_PATH] [-tp TARGET_PATH]
