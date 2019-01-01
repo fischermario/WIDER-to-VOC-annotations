@@ -15,8 +15,8 @@ def createAnnotationPascalVocTree(folder, basename, path, width, height):
     ET.SubElement(source, 'database').text = 'Unknown'
 
     size = ET.SubElement(annotation, 'size')
-    ET.SubElement(size, 'width').text = width
-    ET.SubElement(size, 'height').text = height
+    ET.SubElement(size, 'width').text = str(width)
+    ET.SubElement(size, 'height').text = str(height)
     ET.SubElement(size, 'depth').text = '3'
 
     ET.SubElement(annotation, 'segmented').text = '0'
@@ -44,7 +44,7 @@ def parseImFilename(imFilename, imPath):
     folder, basename = imFilename.split('/')
     width, height = im.size
 
-    return folder, basename, imFilename, str(width), str(height)
+    return folder, basename, imFilename, width, height
 
 def convertWFAnnotations(annotationsPath, targetPath, imPath):
     ann = None
