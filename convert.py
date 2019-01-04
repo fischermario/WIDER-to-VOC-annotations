@@ -94,8 +94,8 @@ def convertWFAnnotations(annotationsPath, targetPath, imPath):
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert WIDER annotations to VOC format')
     parser.add_argument('-ap', dest='annotations_path', help='the annotations file path. ie:"./wider_face_split/wider_face_train_bbx_gt.txt".')
-    parser.add_argument('-tp', dest='target_path', help='the target directory path where XML files will be copied.')
-    parser.add_argument('-ip', dest='images_path', help='the images directory path. ie:"./WIDER_train/images"')
+    parser.add_argument('-td', dest='target_dir', help='the target directory where XML files will be saved.')
+    parser.add_argument('-id', dest='images_dir', help='the images directory. ie:"./WIDER_train/images"')
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -107,5 +107,5 @@ if __name__ == '__main__':
 
     args = parse_args()
     
-    convertWFAnnotations(args.annotations_path, args.target_path, args.images_path)
+    convertWFAnnotations(args.annotations_path, args.target_dir, args.images_dir)
 
