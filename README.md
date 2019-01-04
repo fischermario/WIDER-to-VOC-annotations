@@ -20,10 +20,10 @@ optional arguments:
 Convert wider annotation text files using the following commands:
 
 ```
-$ ./convert.py -ap ./wider_face_split/wider_face_train_bbx_gt.txt -td ./WIDER_train_annotations/ -id ./WIDER_train/images/
-$ ./convert.py -ap ./wider_face_split/wider_face_val_bbx_gt.txt -td ./WIDER_val_annotations/ -id ./WIDER_val/images/
+$ python convert.py -ap ./wider_face_split/wider_face_train_bbx_gt.txt -td ./WIDER_train_annotations/ -id ./WIDER_train/images/
+$ python convert.py -ap ./wider_face_split/wider_face_val_bbx_gt.txt -td ./WIDER_val_annotations/ -id ./WIDER_val/images/
 ```
 
-Note: the convert.py is modified from [here](https://github.com/akofman/wider-face-pascal-voc-annotations) to:
+Note: the convert.py is modified from [here](https://github.com/akofman/wider-face-pascal-voc-annotations) to
 1) Discard invalid bounding boxes (e.g. "0--Parade/0_Parade_Parade_0_452.jpg" x1 y1 w h: 0 0 0 0)
 2) Add toprettyxml for xml readability
