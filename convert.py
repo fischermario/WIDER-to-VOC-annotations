@@ -49,6 +49,8 @@ def parseImFilename(imFilename, imPath):
 def convertWFAnnotations(annotationsPath, targetPath, imPath):
     ann = None
     basename = ''
+    no_obj_img = []
+    xml_counter = 0
     with open(annotationsPath) as f:
         line = f.readline().strip()
         while line:
@@ -65,7 +67,7 @@ def convertWFAnnotations(annotationsPath, targetPath, imPath):
                 y2 = y1 + h
 
                 if (x2 <= x1 or y2 <= y1):
-                    print('Error Image "{}" x1 y1 w h: {} {} {} {}'.format(imFilename,x1,y1,w,h))
+                    #print('Error Image "{}" x1 y1 w h: {} {} {} {}'.format(imFilename,x1,y1,w,h))
                     continue
 
                 ann.getroot().append(createObjectPascalVocTree(x1, y1, x2, y2, width, height).getroot())
@@ -74,10 +76,20 @@ def convertWFAnnotations(annotationsPath, targetPath, imPath):
             if not os.path.exists(targetPath):
                  os.makedirs(targetPath)
             annFilename = os.path.join(targetPath, basename.replace('.jpg','.xml'))
+            
+            if ann.find("object") == None:
+                no_obj_img.append(line)
+
             with open(annFilename,"w") as sf:
                 sf.write(xmlstr)
             print('{} => {}'.format(basename, annFilename))
             line = f.readline().strip()
+
+            xml_counter += 1
+
+    print("Created {} xml".format(xml_counter))
+    for i in no_obj_img:
+        print("Warning: '{}' contains no object".format(i))
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert WIDER annotations to VOC format')
