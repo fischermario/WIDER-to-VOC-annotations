@@ -38,25 +38,27 @@ def createObjectPascalVocTree(xmin, ymin, xmax, ymax, image_width, image_height)
 
     return ET.ElementTree(obj)
 
-def parseImFilename(imFilename, imPath):
-    im = Image.open(os.path.join(imPath, imFilename))
+def parseImFilename(imFilename, imFolder):
+    im = Image.open(os.path.join(imFolder, imFilename))
             
     folder, basename = imFilename.split('/')
     width, height = im.size
 
     return folder, basename, imFilename, width, height
 
-def convertWFAnnotations(annotationsPath, targetPath, imPath, validOnly, occlusionOptions, blurOptions):
+def convertWFAnnotations(annotationsPath, targetDir, imFolder, validOnly, occlusionOptions, blurOptions):
     ann = None
     basename = ''
+    no_obj_img = []
+    xml_counter = 0
     with open(annotationsPath) as f:
-        if not os.path.exists(targetPath):
-            os.makedirs(targetPath)
+        if not os.path.exists(targetDir):
+            os.makedirs(targetDir)
         line = f.readline().strip()
         while line:
             imFilename = line
-            folder, basename, path, width, height = parseImFilename(imFilename, imPath)
-            ann = createAnnotationPascalVocTree(folder, basename, os.path.join(imPath, path), width, height)
+            folder, basename, path, width, height = parseImFilename(imFilename, imFolder)
+            ann = createAnnotationPascalVocTree(folder, basename, os.path.join(imFolder, path), width, height)
             nbBndboxes = f.readline().strip()
             
             i = 0
@@ -84,28 +86,30 @@ def convertWFAnnotations(annotationsPath, targetPath, imPath, validOnly, occlusi
                 ann.getroot().append(createObjectPascalVocTree(x1, y1, x2, y2, width, height).getroot())
 
             xmlstr = minidom.parseString(ET.tostring(ann.getroot())).childNodes[0].toprettyxml(indent="    ")
-            annFilename = os.path.join(targetPath, basename.replace('.jpg','.xml'))
+            annFilename = os.path.join(targetDir, basename.replace('.jpg','.xml'))
+
+            if ann.find("object") == None:
+                no_obj_img.append(line)
             if foundValidBoxes:
+                xml_counter += 1
                 with open(annFilename,"w") as sf:
                     sf.write(xmlstr)
             print('{} => {}'.format(basename, annFilename))
             line = f.readline().strip()
 
+
+    for i in no_obj_img:
+        print('[WARNING] "{}" contains no object and is not converted.'.format(i))
+    print("Created {} xml".format(xml_counter))
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert WIDER annotations to VOC format')
-    parser.add_argument('-ap', dest='annotations_path', required=True, 
-        help='The annotations file path, ie: "./wider_face_split/wider_face_train_bbx_gt.txt".')
-    parser.add_argument('-tp', dest='target_path', required=True,
-        help='The target directory path where XML files will be copied')
-    parser.add_argument('-ip', dest='images_path', required=True, 
-        help='The images directory path, ie: "./WIDER_train/images"')
-
-    parser.add_argument('-vl', dest="valid", action='store_true', default=False,
-        help='Only include valid boxes')
-    parser.add_argument('-oc', dest="occlusion", nargs='+', default=['0', '1', '2'], choices=['0', '1', '2'],
-        help='[LIST] Filter "occlusion": no occlusion->0, partial occlusion->1, heavy occlusion->2; ie: "0 1"')
-    parser.add_argument('-bl', dest="blur", nargs='+', default=['0', '1', '2'], choices=['0', '1', '2'],
-        help='[LIST] Filter "blur": clear->0, normal blur->1, heavy blur->2; ie: "0 1"')
+    parser.add_argument('-ap', dest='annotations_path', required=True, help='the annotations file path. ie: "-ap ./wider_face_split/wider_face_train_bbx_gt.txt".')
+    parser.add_argument('-td', dest='target_dir', required=True, help='the target directory where XML files will be saved. ie: "-td ./WIDER_train_annotations"')
+    parser.add_argument('-id', dest='images_dir', required=True, help='the images directory. ie:"-id ./WIDER_train/images"')
+    parser.add_argument('-vl', dest="valid", action='store_true', default=False, help='Only include valid boxes from WIDERFACE annotation')
+    parser.add_argument('-oc', dest="occlusion", nargs='+', default=[0, 1, 2], choices=[0, 1, 2], type=int, help='Filter boxes by "occlusion" flag: no occlusion->0, partial occlusion->1, heavy occlusion->2; ie: "-oc 0 1"')
+    parser.add_argument('-bl', dest="blur", nargs='+', default=[0, 1, 2], choices=[0, 1, 2], type=int, help='Filter boxes by "blur" flag: clear->0, normal blur->1, heavy blur->2; ie: "-bl 0 1"')
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -113,14 +117,11 @@ def parse_args():
 
     args = parser.parse_args()
 
-    args.occlusion = [int(k) for k in args.occlusion]
-    args.blur = [int(k) for k in args.blur]
-
     return args
 
 if __name__ == '__main__':
 
     args = parse_args()
 
-    convertWFAnnotations(args.annotations_path, args.target_path, args.images_path, args.valid, args.occlusion, args.blur)
+    convertWFAnnotations(args.annotations_path, args.target_dir, args.images_dir, args.valid, args.occlusion, args.blur)
 
